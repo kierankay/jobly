@@ -1,0 +1,51 @@
+const express = require('express');
+const router = express.Router();
+const Job = require('../models/job');
+
+router.post('/', async function (req, res, next) {
+  try {
+    let result = await Job.create(req.body);
+    return res.json(result[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/', async function (req, res, next) {
+  try {
+    let query = req.query;
+    let result = await Job.getAll(query)
+    return res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/:id', async function (req, res, next) {
+  try {
+    let result = await Job.get(req.params.id);
+    return res.json(result[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.patch('/:id', async function (req, res, next) {
+  try {
+    let result = await Job.patch(req.body, req.params.id);
+    return res.json(result[0]);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/:id', async function (req, res, next) {
+  try {
+    await Job.delete(req.params.id);
+    return res.json({message: "Job deleted"});
+  } catch(err) {
+    next(err);
+  }
+});
+
+module.exports = router;

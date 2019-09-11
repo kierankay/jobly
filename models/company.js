@@ -49,11 +49,34 @@ class Company {
 
   static async get(handle) {
     let result = await db.query(`
-      SELECT * FROM companies
-      WHERE handle=$1
+      SELECT *
+      FROM companies
+      LEFT JOIN jobs
+      ON companies.handle = jobs.company_handle
+      WHERE companies.handle=$1
     `, [handle]);
 
-    return result.rows;
+    let jobsArr = [];
+    for (let row of result.rows) {
+      let obj = {
+        title: row.title,
+        salary: row.salary,
+        equity: row.equity,
+        date_posted: row.date_posted
+      }
+      jobsArr.push(obj);
+    }
+    let co = result.rows[0];
+    let companyObj = {
+      handle: co.handle,
+      name: co.name,
+      num_employees: co.num_employees,
+      description: co.description,
+      logo_url: co.logo_url,
+      jobs: jobsArr
+    }
+
+    return companyObj;
   }
 
   static async patch(items, id) {
@@ -76,9 +99,11 @@ class Company {
 }
 
 function processArgs(arg, string, statementParams, queryString, idx) {
-  queryString.push(string);
-  statementParams.push(arg);
-  idx += 1;
+  if(arg) {
+    queryString.push(string);
+    statementParams.push(arg);
+    idx += 1;
+  }
   return idx
 }
 
