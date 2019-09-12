@@ -13,10 +13,12 @@ app.use(express.json());
 // add logging system
 app.use(morgan("tiny"));
 
+const authRoutes = require('./routes/authRoutes');
 const companyRoutes = require('./routes/companiesRoutes');
 const jobRoutes = require('./routes/jobsRoutes');
 const userRoutes = require('./routes/userRoutes');
 
+app.use('/auth', authRoutes);
 app.use('/companies', companyRoutes);
 app.use('/jobs', jobRoutes);
 app.use('/users', userRoutes);

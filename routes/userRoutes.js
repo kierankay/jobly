@@ -2,6 +2,10 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const ExpressError = require('../helpers/expressError');
+const jwt = require('jsonwebtoken');
+const {
+  SECRET_KEY
+} = require('../config');
 
 const jsonschema = require('jsonschema');
 const userPostSchema = require('../schemas/userPostSchema');
@@ -16,9 +20,18 @@ router.post('/', async function (req, res, next) {
       let error = new ExpressError(listOfErrors, 400);
       return next(error);
     }
-
-    let result = await User.add(req.body)
-    return res.json(result[0]);
+    let isAdmin = req.body.is_admin;
+    let username = req.body.username;
+    let result = await User.add(req.body);
+    let token = jwt.sign({
+        username: username,
+        is_admin: isAdmin
+      },
+      SECRET_KEY
+    );
+    return res.json({
+      _token: token
+    });
   } catch (err) {
     return next(err);
   }
@@ -62,7 +75,9 @@ router.patch('/:username', async function (req, res, next) {
 router.delete('/:username', async function (req, res, next) {
   try {
     let result = await User.delete(req.params.username);
-    return res.json({message: "User deleted"});
+    return res.json({
+      message: "User deleted"
+    });
   } catch (err) {
     return next(err);
   }

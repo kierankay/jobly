@@ -9,6 +9,19 @@ const {
 
 
 class User {
+  static async login({username, password}) {
+    let result = await db.query(`
+    SELECT password, is_admin
+    FROM users
+    WHERE username = $1 `, [username]);
+
+    if (result.rows.length === 0) {
+      throw new ExpressError('User not found', 404)
+    }
+
+    return result.rows;
+  }
+
   static async add({
     username,
     password,
