@@ -14,7 +14,6 @@ router.post('/', ensureIsAdmin, async function (req, res, next) {
 
 router.get('/', async function (req, res, next) {
   try {
-    console.log("SOMETHING LOUD")
     let query = req.query;
     let result = await Job.getAll(query)
     return res.json(result);

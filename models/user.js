@@ -43,7 +43,7 @@ class User {
     VALUES ($1, $2, $3, $4, $5, $6, $7)
     RETURNING username, first_name, last_name, email, photo_url, is_admin
     `, [username, hashedPassword, first_name, last_name, email, photo_url, is_admin])
-    return result.rows
+    return result.rows;
   }
 
   static async getAll() {
@@ -58,7 +58,10 @@ class User {
     SELECT username, first_name, last_name, email, photo_url, is_admin 
     FROM users
     WHERE username = $1
-    `, [username])
+    `, [username]);
+    if (result.rows.length === 0) {
+      throw new ExpressError("User not found", 404);
+    }
     return result.rows
   }
 

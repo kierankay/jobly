@@ -21,7 +21,7 @@ router.post('/', async function (req, res, next) {
     }
     let isAdmin = req.body.is_admin;
     let username = req.body.username;
-    let result = await User.add(req.body);
+    await User.add(req.body);
     let token = jwt.sign({
       username: username,
       is_admin: isAdmin
