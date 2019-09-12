@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const Job = require('../models/job');
 const { ensureIsAdmin, ensureLoggedIn } = require("../middleware/middleware");
-const {ensureLoggedIn} = require('../middleware/middleware');
 
 router.post('/', ensureIsAdmin, async function (req, res, next) {
   try {
