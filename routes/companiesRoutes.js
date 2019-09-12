@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Company = require('../models/company');
+const {ensureLoggedIn} = require('../middleware/middleware')
 
-router.get('/', async function (req, res, next) {
+router.get('/', ensureLoggedIn, async function (req, res, next) {
   try {
     let query = req.query;
     let result = await Company.getAll(query)
@@ -21,7 +22,7 @@ router.post('/', async function (req, res, next) {
   }
 });
 
-router.get('/:handle', async function (req, res, next) {
+router.get('/:handle', ensureLoggedIn, async function (req, res, next) {
   try {
     let result = await Company.get(req.params.handle);
     return res.json({

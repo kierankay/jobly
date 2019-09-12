@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Job = require('../models/job');
+const {ensureLoggedIn} = require('../middleware/middleware');
 
 router.post('/', async function (req, res, next) {
   try {
@@ -13,6 +14,7 @@ router.post('/', async function (req, res, next) {
 
 router.get('/', async function (req, res, next) {
   try {
+    console.log("SOMETHING LOUD")
     let query = req.query;
     let result = await Job.getAll(query)
     return res.json(result);
@@ -21,7 +23,7 @@ router.get('/', async function (req, res, next) {
   }
 });
 
-router.get('/:id', async function (req, res, next) {
+router.get('/:id', ensureLoggedIn, async function (req, res, next) {
   try {
     let result = await Job.get(req.params.id);
     return res.json(result[0]);

@@ -8,10 +8,13 @@ const morgan = require("morgan");
 
 const app = express();
 
+const {authenticateJWT} = require('./middleware/middleware')
+
 app.use(express.json());
 
 // add logging system
 app.use(morgan("tiny"));
+app.use(authenticateJWT);
 
 const authRoutes = require('./routes/authRoutes');
 const companyRoutes = require('./routes/companiesRoutes');
