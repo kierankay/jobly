@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Company = require('../models/company');
-const {ensureLoggedIn} = require('../middleware/middleware')
+const { ensureIsAdmin, ensureLoggedIn } = require("../middleware/middleware");
+
 
 router.get('/', ensureLoggedIn, async function (req, res, next) {
   try {
@@ -13,7 +14,7 @@ router.get('/', ensureLoggedIn, async function (req, res, next) {
   }
 });
 
-router.post('/', async function (req, res, next) {
+router.post('/', ensureIsAdmin, async function (req, res, next) {
   try {
     let result = await Company.add(req.body);
     return res.json(result[0]);
@@ -33,7 +34,7 @@ router.get('/:handle', ensureLoggedIn, async function (req, res, next) {
   }
 });
 
-router.patch('/:handle', async function (req, res, next) {
+router.patch('/:handle', ensureIsAdmin, async function (req, res, next) {
   try {
     let result = await Company.patch(req.body, req.params.handle);
     return res.json(result[0]);
@@ -42,7 +43,7 @@ router.patch('/:handle', async function (req, res, next) {
   }
 });
 
-router.delete('/:handle', async function (req, res, next) {
+router.delete('/:handle', ensureIsAdmin, async function (req, res, next) {
   try {
     await Company.delete(req.params.handle);
     return res.json({

@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const Job = require('../models/job');
+const { ensureIsAdmin, ensureLoggedIn } = require("../middleware/middleware");
 const {ensureLoggedIn} = require('../middleware/middleware');
 
-router.post('/', async function (req, res, next) {
+router.post('/', ensureIsAdmin, async function (req, res, next) {
   try {
     let result = await Job.create(req.body);
     return res.json(result[0]);
@@ -32,7 +33,7 @@ router.get('/:id', ensureLoggedIn, async function (req, res, next) {
   }
 });
 
-router.patch('/:id', async function (req, res, next) {
+router.patch('/:id', ensureIsAdmin, async function (req, res, next) {
   try {
     let result = await Job.patch(req.body, req.params.id);
     return res.json(result[0]);
@@ -41,7 +42,7 @@ router.patch('/:id', async function (req, res, next) {
   }
 });
 
-router.delete('/:id', async function (req, res, next) {
+router.delete('/:id', ensureIsAdmin, async function (req, res, next) {
   try {
     await Job.delete(req.params.id);
     return res.json({message: "Job deleted"});

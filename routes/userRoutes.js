@@ -3,9 +3,8 @@ const router = express.Router();
 const User = require('../models/user');
 const ExpressError = require('../helpers/expressError');
 const jwt = require('jsonwebtoken');
-const {
-  SECRET_KEY
-} = require('../config');
+const { SECRET_KEY } = require('../config');
+const { ensureCorrectUser } = require("../middleware/middleware");
 
 const jsonschema = require('jsonschema');
 const userPostSchema = require('../schemas/userPostSchema');
@@ -24,9 +23,9 @@ router.post('/', async function (req, res, next) {
     let username = req.body.username;
     let result = await User.add(req.body);
     let token = jwt.sign({
-        username: username,
-        is_admin: isAdmin
-      },
+      username: username,
+      is_admin: isAdmin
+    },
       SECRET_KEY
     );
     return res.json({
@@ -55,7 +54,7 @@ router.get('/:username', async function (req, res, next) {
   }
 })
 
-router.patch('/:username', async function (req, res, next) {
+router.patch('/:username', ensureCorrectUser, async function (req, res, next) {
   try {
     const validation = jsonschema.validate(req.body, userPatchSchema);
 
@@ -72,7 +71,7 @@ router.patch('/:username', async function (req, res, next) {
   }
 });
 
-router.delete('/:username', async function (req, res, next) {
+router.delete('/:username', ensureCorrectUser, async function (req, res, next) {
   try {
     let result = await User.delete(req.params.username);
     return res.json({
