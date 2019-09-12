@@ -3,15 +3,24 @@ const ExpressError = require('../helpers/expressError');
 const partialUpdate = require('../helpers/partialUpdate');
 
 class Job {
-  static async create({ title, salary, equity, company_handle }) {
-    let result = await db.query(`
+  static async create({
+    title,
+    salary,
+    equity,
+    company_handle
+  }) {
+    try {
+      let result = await db.query(`
       INSERT INTO jobs
       (title, salary, equity, company_handle)
       VALUES ($1, $2, $3, $4)
       RETURNING title, salary, equity, company_handle
     `, [title, salary, equity, company_handle]);
 
-    return result.rows;
+      return result.rows;
+    } catch (err) {
+      throw new ExpressError('Unable to create job, check required formatting', 400)
+    }
   }
 
   static async getAll({
@@ -26,8 +35,8 @@ class Job {
     idx = processArgs(search, `$${idx} iLIKE CONCAT('%',company_handle,'%') 
     or company_handle iLIKE CONCAT('%',$${idx},'%')
     or $${idx} iLIKE CONCAT('%',title,'%')
-    or title iLIKE CONCAT('%',$${idx},'%')`, 
-    statementParams, queryString, idx)
+    or title iLIKE CONCAT('%',$${idx},'%')`,
+      statementParams, queryString, idx)
 
     idx = processArgs(min_salary, `salary >= $${idx}`, statementParams, queryString, idx)
     idx = processArgs(min_equity, `equity >= $${idx}`, statementParams, queryString, idx)
@@ -38,8 +47,6 @@ class Job {
     if (queryString) {
       finalQueryString = 'WHERE ' + queryString;
     }
-
-    console.log("FINAL QUERY STRING --->", finalQueryString);
 
     let result = await db.query(`
     SELECT *
@@ -54,13 +61,22 @@ class Job {
     SELECT * FROM jobs
     WHERE id=$1`, [id]);
 
+    if (result.rows.length === 0) {
+      throw new ExpressError(`That job doesn't exist`, 404)
+    }
+
     return result.rows;
   }
 
   static async patch(items, id) {
-    let query = partialUpdate('jobs', items, 'id', id);
-    let response = await db.query(query.query, query.values);
-    return response.rows;
+    try {
+      let query = partialUpdate('jobs', items, 'id', id);
+      let response = await db.query(query.query, query.values);
+
+      return response.rows;
+    } catch (err) {
+      throw new ExpressError("Unable to update job, check formatting", 400)
+    }
   }
 
   static async delete(id) {
@@ -77,7 +93,7 @@ class Job {
 }
 
 function processArgs(arg, string, statementParams, queryString, idx) {
-  if(arg) {
+  if (arg) {
     queryString.push(string);
     statementParams.push(arg);
     idx += 1;

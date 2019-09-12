@@ -56,6 +56,10 @@ class Company {
       WHERE companies.handle=$1
     `, [handle]);
 
+    if (result.rows.length === 0) {
+      throw new ExpressError("Company not found", 404);
+    };
+    
     let jobsArr = [];
     for (let row of result.rows) {
       let obj = {
@@ -81,8 +85,11 @@ class Company {
 
   static async patch(items, id) {
     let query = partialUpdate('companies', items, 'handle', id);
-    let response = await db.query(query.query, query.values);
-    return response.rows;
+    let result = await db.query(query.query, query.values);
+    if (result.rows.length === 0) {
+      throw new ExpressError("Company not found", 404);
+    }
+    return result.rows;
   }
 
   static async delete(id) {

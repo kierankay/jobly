@@ -1,4 +1,3 @@
-\c jobly
 
 DROP TABLE users;
 
