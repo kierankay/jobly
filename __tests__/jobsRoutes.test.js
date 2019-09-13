@@ -2,15 +2,38 @@ const request = require("supertest");
 const Company = require("../models/company");
 const Job = require("../models/job");
 const jwt = require("jsonwebtoken");
-const { SECRET_KEY } = require("../config");
+const {
+  SECRET_KEY
+} = require("../config");
 
 const app = require("../app");
 const db = require("../db");
+const User = require('../models/user')
+let testToken1;
 describe("Jobs routes test", function () {
 
   beforeEach(async function () {
     await db.query("DELETE FROM jobs");
     await db.query("DELETE FROM companies");
+    await db.query("DELETE FROM users");
+
+    let u1 = await User.add({
+      username: "onetruegod",
+      password: "password",
+      first_name: "Nic",
+      last_name: "Cage",
+      email: "nic@cage.onetruegod",
+      photo_url: "https://www.monstersandcritics.com/wp-content/uploads/2019/06/nic-cage-eyes.jpg",
+      is_admin: true
+    });
+
+    u1 = u1[0];
+
+    let payload1 = {
+      username: u1.username,
+      is_admin: u1.is_admin
+    };
+    testToken1 = jwt.sign(payload1, SECRET_KEY);
 
     let c1 = await Company.add({
       handle: "Cuba",
@@ -43,7 +66,8 @@ describe("Jobs routes test", function () {
           title: "Chief Propagandist",
           salary: 150000,
           equity: 0,
-          company_handle: "Cuba"
+          company_handle: "Cuba",
+          _token: testToken1
         });
 
       expect(response.status).toEqual(200);
@@ -62,7 +86,8 @@ describe("Jobs routes test", function () {
           title: "Chief Propagandist",
           salary: "Too High",
           equity: "something else",
-          company_handle: "Cuba"
+          company_handle: "Cuba",
+          _token: testToken1
         });
 
       expect(response.status).toEqual(400);
@@ -76,7 +101,9 @@ describe("Jobs routes test", function () {
   describe("GET /", function () {
     test("Successfully getting multiple jobs", async function () {
       let response = await request(app)
-        .get('/jobs');
+        .get('/jobs').send({
+          _token: testToken1
+        });
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual([{
@@ -102,11 +129,15 @@ describe("Jobs routes test", function () {
   describe("GET /:id", function () {
     test("Successfully get a specific job", async function () {
       let search = await request(app)
-        .get('/jobs');
+        .get('/jobs').send({
+          _token: testToken1
+        });
       let validId = search.body[0].id;
 
       let response = await request(app)
-        .get(`/jobs/${validId}`);
+        .get(`/jobs/${validId}`).send({
+          _token: testToken1
+        });
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -121,10 +152,14 @@ describe("Jobs routes test", function () {
 
     test("Fail getting a job that doesn't exist", async function () {
       let response = await request(app)
-        .get(`/jobs/0`);
+        .get(`/jobs/0`).send({
+          _token: testToken1
+        });
 
       expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: "That job doesn't exist", status: 404
+      expect(response.body).toEqual({
+        message: "That job doesn't exist",
+        status: 404
       });
     });
   });
@@ -132,13 +167,16 @@ describe("Jobs routes test", function () {
   describe("PATCH /:id", function () {
     test("Successfully patch an existing job", async function () {
       let search = await request(app)
-        .get('/jobs');
+        .get('/jobs').send({
+          _token: testToken1
+        });
       let validId = search.body[0].id;
 
       let response = await request(app)
         .patch(`/jobs/${validId}`)
         .send({
-          equity: 0
+          equity: 0,
+          _token: testToken1
         });
 
       expect(response.status).toEqual(200);
@@ -154,18 +192,22 @@ describe("Jobs routes test", function () {
 
     test("Fail at patching an existing job", async function () {
       let search = await request(app)
-        .get('/jobs');
+        .get('/jobs').send({
+          _token: testToken1
+        });
       let validId = search.body[0].id;
 
       let response = await request(app)
         .patch(`/jobs/${validId}`)
         .send({
-          equity: "EVERYTHING!"
+          equity: "EVERYTHING!",
+          _token: testToken1
         });
 
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
-        message: "Unable to update job, check formatting", status: 400
+        message: "Unable to update job, check formatting",
+        status: 400
       });
     });
   });
@@ -173,11 +215,15 @@ describe("Jobs routes test", function () {
   describe("DELETE /:id", function () {
     test("Successfully delete specific job", async function () {
       let search = await request(app)
-        .get('/jobs');
+        .get('/jobs').send({
+          _token: testToken1
+        });
       let validId = search.body[0].id;
 
       let response = await request(app)
-        .delete(`/jobs/${validId}`);
+        .delete(`/jobs/${validId}`).send({
+          _token: testToken1
+        });
 
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
@@ -187,7 +233,9 @@ describe("Jobs routes test", function () {
 
     test("Fail to delete a non-existent job", async function () {
       let response = await request(app)
-        .delete(`/jobs/0`);
+        .delete(`/jobs/0`).send({
+          _token: testToken1
+        });
 
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
