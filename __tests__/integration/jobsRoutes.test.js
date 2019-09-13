@@ -1,14 +1,14 @@
 const request = require("supertest");
-const Company = require("../models/company");
-const Job = require("../models/job");
+const Company = require("../../models/company");
+const Job = require("../../models/job");
 const jwt = require("jsonwebtoken");
 const {
   SECRET_KEY
-} = require("../config");
+} = require("../../config");
 
-const app = require("../app");
-const db = require("../db");
-const User = require('../models/user')
+const app = require("../../app");
+const db = require("../../db");
+const User = require('../../models/user')
 let testToken1;
 describe("Jobs routes test", function () {
 

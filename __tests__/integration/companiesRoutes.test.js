@@ -2,12 +2,12 @@ const request = require("supertest");
 const jwt = require("jsonwebtoken");
 const {
   SECRET_KEY
-} = require("../config");
+} = require("../../config");
 
-const app = require("../app");
-const db = require("../db");
-const Company = require("../models/company");
-const User = require('../models/user')
+const app = require("../../app");
+const db = require("../../db");
+const Company = require("../../models/company");
+const User = require('../../models/user')
 let testToken1;
 
 describe("Company Routes Test", function () {

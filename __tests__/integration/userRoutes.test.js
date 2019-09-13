@@ -1,10 +1,10 @@
 const request = require("supertest");
-const User = require("../models/user");
+const User = require("../../models/user");
 const jwt = require("jsonwebtoken");
-const { SECRET_KEY } = require("../config");
+const { SECRET_KEY } = require("../../config");
 
-const app = require("../app");
-const db = require("../db");
+const app = require("../../app");
+const db = require("../../db");
 
 describe("User routes test", function () {
 
